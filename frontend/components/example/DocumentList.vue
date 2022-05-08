@@ -36,6 +36,9 @@
     <template #[`item.meta`]="{ item }">
       {{ JSON.stringify(item.meta, null, 4) }}
     </template>
+    <template #[`item.isConfirmed`]="{ item }">
+      <span> {{ 1 ? item.isConfirmed: 0 }} </span>
+    </template>
     <template #[`item.commentCount`]="{ item }">
       <span> {{ item.commentCount }} </span>
     </template>
@@ -101,6 +104,12 @@ export default Vue.extend({
           text: this.$t('dataset.metadata'),
           value: 'meta',
           sortable: false
+        },
+        {
+          text: this.$t('dataset.is_comfirmed'),
+          value: 'isConfirmed',
+          sortable: false,
+          filterable: true
         },
         {
           text: this.$t('comments.comments'),
