@@ -6,6 +6,9 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.prod
     image: doccano_backend:prod
+    ports:
+      - "8000:8000"
+    restart: always
     volumes:
       - static_volume:/backend/staticfiles
       - media:/backend/media
@@ -18,6 +21,8 @@ services:
       ALLOW_SIGNUP: "False"
       DEBUG: "False"
       DJANGO_SETTINGS_MODULE: "config.settings.production"
+      # CSRF_TRUSTED_ORIGINS:
+      #   - "http://47.103.76.95:9000"
     depends_on:
       - postgres
     networks:
@@ -29,6 +34,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.prod
     image: doccano_celery:prod
+    restart: always
     volumes:
       - media:/backend/media
     entrypoint: ["/opt/bin/prod-celery.sh"]
@@ -45,6 +51,7 @@ services:
 
   rabbitmq:
     image: rabbitmq:3.8-alpine
+    restart: always
     environment:
       RABBITMQ_DEFAULT_USER: "${RABBITMQ_DEFAULT_USER}"
       RABBITMQ_DEFAULT_PASS: "${RABBITMQ_DEFAULT_PASS}"
@@ -57,6 +64,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.nginx
+    restart: always
     environment:
       API_URL: "http://backend:8000"
       GOOGLE_TRACKING_ID: ""
@@ -64,7 +72,7 @@ services:
       - static_volume:/static
       - media:/media
     ports:
-      - 80:8080
+      - 9000:8080
     depends_on:
       - backend
     networks:
@@ -72,8 +80,11 @@ services:
 
   postgres:
     image: postgres:13.3-alpine
+    restart: always
     volumes:
       - postgres_data:/var/lib/postgresql/data/
+    ports:
+      - 5432:5432
     environment:
       POSTGRES_USER: "${POSTGRES_USER}"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"

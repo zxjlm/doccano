@@ -10,10 +10,10 @@
     :loading-text="$t('generic.loading')"
     :no-data-text="$t('vuetify.noDataAvailable')"
     :footer-props="{
-      'showFirstLastPage': true,
+      showFirstLastPage: true,
       'items-per-page-options': [10, 50, 100],
       'items-per-page-text': $t('vuetify.itemsPerPageText'),
-      'page-text': $t('dataset.pageText')
+      'page-text': $t('dataset.pageText'),
     }"
     item-key="id"
     show-select
@@ -37,126 +37,125 @@
       {{ JSON.stringify(item.meta, null, 4) }}
     </template>
     <template #[`item.isConfirmed`]="{ item }">
-      <span> {{ 1 ? item.isConfirmed: 0 }} </span>
+      <span> {{ 1 ? item.isConfirmed : 0 }} </span>
     </template>
     <template #[`item.commentCount`]="{ item }">
       <span> {{ item.commentCount }} </span>
     </template>
     <template #[`item.action`]="{ item }">
-      <v-btn
-        small
-        color="primary text-capitalize"
-        @click="toLabeling(item)"
-      >
-        {{ $t('dataset.annotate') }}
+      <v-btn small color="primary text-capitalize" @click="toLabeling(item)">
+        {{ $t("dataset.annotate") }}
       </v-btn>
     </template>
   </v-data-table>
 </template>
 
 <script lang="ts">
-import Vue, { PropType } from 'vue'
-import { mdiMagnify } from '@mdi/js'
-import { DataOptions } from 'vuetify/types'
-import { ExampleDTO } from '~/services/application/example/exampleData'
+import Vue, { PropType } from "vue";
+import { mdiMagnify } from "@mdi/js";
+import { DataOptions } from "vuetify/types";
+import { ExampleDTO } from "~/services/application/example/exampleData";
 
 export default Vue.extend({
   props: {
     isLoading: {
       type: Boolean,
       default: false,
-      required: true
+      required: true,
     },
     items: {
       type: Array as PropType<ExampleDTO[]>,
       default: () => [],
-      required: true
+      required: true,
     },
     value: {
       type: Array as PropType<ExampleDTO[]>,
       default: () => [],
-      required: true
+      required: true,
     },
     total: {
       type: Number,
       default: 0,
-      required: true
-    }
+      required: true,
+    },
   },
 
   data() {
     return {
       search: this.$route.query.q,
       options: {} as DataOptions,
-      mdiMagnify
-    }
+      mdiMagnify,
+    };
   },
 
   computed: {
     headers() {
       return [
         {
-          text: this.$t('dataset.text'),
-          value: 'text',
-          sortable: false
-        },
-        {
-          text: this.$t('dataset.metadata'),
-          value: 'meta',
-          sortable: false
-        },
-        {
-          text: this.$t('dataset.is_comfirmed'),
-          value: 'isConfirmed',
+          text: this.$t("dataset.text"),
+          value: "text",
           sortable: false,
-          filterable: true
         },
         {
-          text: this.$t('comments.comments'),
-          value: 'commentCount',
-          sortable: false
+          text: this.$t("dataset.metadata"),
+          value: "meta",
+          sortable: false,
         },
         {
-          text: this.$t('dataset.action'),
-          value: 'action',
-          sortable: false
-        }
-      ]
-    }
+          text: this.$t("dataset.is_comfirmed"),
+          value: "isConfirmed",
+          sortable: false,
+          filterable: true,
+        },
+        {
+          text: this.$t("comments.comments"),
+          value: "commentCount",
+          sortable: false,
+        },
+        {
+          text: this.$t("dataset.action"),
+          value: "action",
+          sortable: false,
+        },
+      ];
+    },
   },
 
   watch: {
     options: {
       handler() {
-        this.$emit('update:query', {
+        this.$emit("update:query", {
           query: {
             limit: this.options.itemsPerPage.toString(),
-            offset: ((this.options.page - 1) * this.options.itemsPerPage).toString(),
-            q: this.search
-          }
-        })
+            offset: (
+              (this.options.page - 1) *
+              this.options.itemsPerPage
+            ).toString(),
+            q: this.search,
+          },
+        });
       },
-      deep: true
+      deep: true,
     },
     search() {
-      this.$emit('update:query', {
+      this.$emit("update:query", {
         query: {
           limit: this.options.itemsPerPage.toString(),
-          offset: '0',
-          q: this.search
-        }
-      })
-      this.options.page = 1
-    }
+          offset: "0",
+          q: this.search,
+        },
+      });
+      this.options.page = 1;
+    },
   },
 
   methods: {
     toLabeling(item: ExampleDTO) {
-      const index = this.items.indexOf(item)
-      const offset = (this.options.page - 1) * this.options.itemsPerPage
-      const page = (offset + index + 1).toString()
-      this.$emit('click:labeling', { page, q: this.search })
-    }
-  }
-})
+      const index = this.items.indexOf(item);
+      const offset = (this.options.page - 1) * this.options.itemsPerPage;
+      const page = (offset + index + 1).toString();
+      this.$emit("click:labeling", { page, q: this.search });
+    },
+  },
+});
 </script>

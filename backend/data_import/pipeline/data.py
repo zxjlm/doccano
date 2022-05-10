@@ -2,6 +2,7 @@ import abc
 import uuid
 from typing import Any, Dict
 
+from django.contrib.auth.models import User
 from pydantic import BaseModel, validator
 
 from examples.models import Example
@@ -34,7 +35,9 @@ class TextData(BaseData):
             raise ValueError("is not empty.")
 
     def create(self, project: Project, meta: Dict[Any, Any]) -> Example:
-        return Example(uuid=uuid.uuid4(), project=project, filename=self.filename, text=self.text, meta=meta)
+        # todo: add assign
+        # User.objects.filter(role)
+        return Example(uuid=uuid.uuid4(), project=project, filename=self.filename, assigned_to="", text=self.text, meta=meta)
 
 
 class FileData(BaseData):

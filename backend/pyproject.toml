@@ -60,6 +60,14 @@ SQLAlchemy = "^1.4.31"
 waitress = "^2.0.0"
 django-health-check = "^3.16.5"
 djangorestframework-xml = "^2.0.0"
+django-storages = {extras = ["google"], version = "^1.12.3"}
+django-cleanup = "^6.0.0"
+filetype = "^1.0.10"
+pandas = "^1.4.2"
+
+[[tool.poetry.source]]
+name = "douban"
+url = "https://pypi.doubanio.com/simple/"
 
 [tool.poetry.dev-dependencies]
 model-mommy = "^2.0.0"
