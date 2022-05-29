@@ -12,7 +12,7 @@ services:
     volumes:
       - static_volume:/backend/staticfiles
       - media:/backend/media
-    entrypoint: ["/bin/bash", "-c", "python -u manage.py runserver 0.0.0.0:8000" ]
+    entrypoint: [ "/opt/bin/prod-django.sh" ]
     environment:
       ADMIN_USERNAME: "${ADMIN_USERNAME}"
       ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
