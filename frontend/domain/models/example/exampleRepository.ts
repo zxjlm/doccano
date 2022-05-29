@@ -16,4 +16,6 @@ export interface ExampleRepository {
   findById(projectId: string, exampleId: number): Promise<ExampleItem>
 
   confirm(projectId: string, exampleId: number): Promise<void>
+
+  approval(projectId: string, exampleId: number): Promise<void>
 }

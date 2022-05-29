@@ -1,20 +1,24 @@
 <template>
-  <layout-text v-if="doc.id" v-shortkey="shortKeys" @shortkey="changeSelectedLabel">
+  <layout-text
+    v-if="doc.id"
+    v-shortkey="shortKeys"
+    @shortkey="changeSelectedLabel"
+  >
     <template #header>
       <toolbar-laptop
         :doc-id="doc.id"
         :enable-auto-labeling.sync="enableAutoLabeling"
         :guideline-text="project.guideline"
         :is-reviewd="doc.isConfirmed"
+        :is-approved="doc.isApproved"
+        :role="doc.role"
         :total="docs.count"
         class="d-none d-sm-block"
         @click:clear-label="clear"
         @click:review="confirm"
+        @click:approval="approval"
       />
-      <toolbar-mobile
-        :total="docs.count"
-        class="d-flex d-sm-none"
-      />
+      <toolbar-mobile :total="docs.count" class="d-flex d-sm-none" />
     </template>
     <template #content>
       <v-card>
@@ -46,19 +50,13 @@
       <v-card class="mt-4">
         <v-card-title>Label Types</v-card-title>
         <v-card-text>
-          <v-switch
-            v-if="useRelationLabeling"
-            v-model="relationMode"
-          >
+          <v-switch v-if="useRelationLabeling" v-model="relationMode">
             <template #label>
               <span v-if="relationMode">Relation</span>
               <span v-else>Span</span>
             </template>
           </v-switch>
-          <v-chip-group
-            v-model="selectedLabelIndex"
-            column
-          >
+          <v-chip-group v-model="selectedLabelIndex" column>
             <v-chip
               v-for="(item, index) in labelTypes"
               :key="item.id"
@@ -87,30 +85,29 @@
 </template>
 
 <script>
-import _ from 'lodash'
-import { mapGetters } from 'vuex'
-import LayoutText from '@/components/tasks/layout/LayoutText'
-import ListMetadata from '@/components/tasks/metadata/ListMetadata'
-import ToolbarLaptop from '@/components/tasks/toolbar/ToolbarLaptop'
-import ToolbarMobile from '@/components/tasks/toolbar/ToolbarMobile'
-import EntityEditor from '@/components/tasks/sequenceLabeling/EntityEditor.vue'
-import AnnotationProgress from '@/components/tasks/sidebar/AnnotationProgress.vue'
+import _ from "lodash";
+import { mapGetters } from "vuex";
+import LayoutText from "@/components/tasks/layout/LayoutText";
+import ListMetadata from "@/components/tasks/metadata/ListMetadata";
+import ToolbarLaptop from "@/components/tasks/toolbar/ToolbarLaptop";
+import ToolbarMobile from "@/components/tasks/toolbar/ToolbarMobile";
+import EntityEditor from "@/components/tasks/sequenceLabeling/EntityEditor.vue";
+import AnnotationProgress from "@/components/tasks/sidebar/AnnotationProgress.vue";
 
 export default {
-
   components: {
     AnnotationProgress,
     EntityEditor,
     LayoutText,
     ListMetadata,
     ToolbarLaptop,
-    ToolbarMobile
+    ToolbarMobile,
   },
 
-  layout: 'workspace',
+  layout: "workspace",
 
   validate({ params, query }) {
-    return /^\d+$/.test(params.id) && /^\d+$/.test(query.page)
+    return /^\d+$/.test(params.id) && /^\d+$/.test(query.page);
   },
 
   data() {
@@ -126,7 +123,7 @@ export default {
       selectedLabelIndex: null,
       progress: {},
       relationMode: false,
-    }
+    };
   },
 
   async fetch() {
@@ -135,151 +132,201 @@ export default {
       this.$route.query.page,
       this.$route.query.q,
       this.$route.query.isChecked
-    )
-    const doc = this.docs.items[0]
+    );
+    const doc = this.docs.items[0];
     if (this.enableAutoLabeling) {
-      await this.autoLabel(doc.id)
+      await this.autoLabel(doc.id);
     }
-    await this.list(doc.id)
+    await this.list(doc.id);
   },
 
   computed: {
-    ...mapGetters('auth', ['isAuthenticated', 'getUsername', 'getUserId']),
-    ...mapGetters('config', ['isRTL']),
+    ...mapGetters("auth", ["isAuthenticated", "getUsername", "getUserId"]),
+    ...mapGetters("config", ["isRTL"]),
 
     shortKeys() {
-      return Object.fromEntries(this.spanTypes.map(item => [item.id, [item.suffixKey]]))
+      return Object.fromEntries(
+        this.spanTypes.map((item) => [item.id, [item.suffixKey]])
+      );
     },
 
     projectId() {
-      return this.$route.params.id
+      return this.$route.params.id;
     },
 
     doc() {
       if (_.isEmpty(this.docs) || this.docs.items.length === 0) {
-        return {}
+        return {};
       } else {
-        return this.docs.items[0]
+        return this.docs.items[0];
       }
     },
 
     selectedLabel() {
       if (Number.isInteger(this.selectedLabelIndex)) {
         if (this.relationMode) {
-          return this.relationTypes[this.selectedLabelIndex]
+          return this.relationTypes[this.selectedLabelIndex];
         } else {
-          return this.spanTypes[this.selectedLabelIndex]
+          return this.spanTypes[this.selectedLabelIndex];
         }
       } else {
-        return null
+        return null;
       }
     },
 
     useRelationLabeling() {
-      return !!this.project.useRelation
+      return !!this.project.useRelation;
     },
 
     labelTypes() {
       if (this.relationMode) {
-        return this.relationTypes
+        return this.relationTypes;
       } else {
-        return this.spanTypes
+        return this.spanTypes;
       }
-    }
+    },
   },
 
   watch: {
-    '$route.query': '$fetch',
+    "$route.query": "$fetch",
     enableAutoLabeling(val) {
       if (val) {
-        this.list(this.doc.id)
+        this.list(this.doc.id);
       }
-    }
+    },
   },
 
   async created() {
-    this.spanTypes = await this.$services.spanType.list(this.projectId)
-    this.relationTypes = await this.$services.relationType.list(this.projectId)
-    this.project = await this.$services.project.findById(this.projectId)
-    this.progress = await this.$services.metrics.fetchMyProgress(this.projectId)
+    this.spanTypes = await this.$services.spanType.list(this.projectId);
+    this.relationTypes = await this.$services.relationType.list(this.projectId);
+    this.project = await this.$services.project.findById(this.projectId);
+    this.progress = await this.$services.metrics.fetchMyProgress(
+      this.projectId
+    );
   },
 
   methods: {
     async maybeFetchSpanTypes(annotations) {
       const labelIds = new Set(this.spanTypes.map((label) => label.id));
       if (annotations.some((item) => !labelIds.has(item.label))) {
-          this.spanTypes = await this.$services.spanType.list(this.projectId);
+        this.spanTypes = await this.$services.spanType.list(this.projectId);
       }
     },
 
     async list(docId) {
-      const annotations = await this.$services.sequenceLabeling.list(this.projectId, docId)
-      const relations = await this.$services.sequenceLabeling.listRelations(this.projectId, docId)
+      const annotations = await this.$services.sequenceLabeling.list(
+        this.projectId,
+        docId
+      );
+      const relations = await this.$services.sequenceLabeling.listRelations(
+        this.projectId,
+        docId
+      );
       // In colab mode, if someone add a new label and annotate data with the label during your work,
       // it occurs exception because there is no corresponding label.
-      await this.maybeFetchSpanTypes(annotations)
-      this.annotations = annotations
-      this.relations = relations
+      await this.maybeFetchSpanTypes(annotations);
+      this.annotations = annotations;
+      this.relations = relations;
     },
 
     async deleteSpan(id) {
-      await this.$services.sequenceLabeling.delete(this.projectId, this.doc.id, id)
-      await this.list(this.doc.id)
+      await this.$services.sequenceLabeling.delete(
+        this.projectId,
+        this.doc.id,
+        id
+      );
+      await this.list(this.doc.id);
     },
 
     async addSpan(startOffset, endOffset, labelId) {
-      await this.$services.sequenceLabeling.create(this.projectId, this.doc.id, labelId, startOffset, endOffset)
-      await this.list(this.doc.id)
+      await this.$services.sequenceLabeling.create(
+        this.projectId,
+        this.doc.id,
+        labelId,
+        startOffset,
+        endOffset
+      );
+      await this.list(this.doc.id);
     },
 
     async updateSpan(annotationId, labelId) {
-      await this.$services.sequenceLabeling.changeLabel(this.projectId, this.doc.id, annotationId, labelId)
-      await this.list(this.doc.id)
+      await this.$services.sequenceLabeling.changeLabel(
+        this.projectId,
+        this.doc.id,
+        annotationId,
+        labelId
+      );
+      await this.list(this.doc.id);
     },
 
     async addRelation(fromId, toId, typeId) {
-      await this.$services.sequenceLabeling.createRelation(this.projectId, this.doc.id, fromId, toId, typeId)
-      await this.list(this.doc.id)
+      await this.$services.sequenceLabeling.createRelation(
+        this.projectId,
+        this.doc.id,
+        fromId,
+        toId,
+        typeId
+      );
+      await this.list(this.doc.id);
     },
 
     async updateRelation(relationId, typeId) {
-      await this.$services.sequenceLabeling.updateRelation(this.projectId, this.doc.id, relationId, typeId)
-      await this.list(this.doc.id)
+      await this.$services.sequenceLabeling.updateRelation(
+        this.projectId,
+        this.doc.id,
+        relationId,
+        typeId
+      );
+      await this.list(this.doc.id);
     },
 
     async deleteRelation(relationId) {
-      await this.$services.sequenceLabeling.deleteRelation(this.projectId, this.doc.id, relationId)
-      await this.list(this.doc.id)
+      await this.$services.sequenceLabeling.deleteRelation(
+        this.projectId,
+        this.doc.id,
+        relationId
+      );
+      await this.list(this.doc.id);
     },
 
     async clear() {
-      await this.$services.sequenceLabeling.clear(this.projectId, this.doc.id)
-      await this.list(this.doc.id)
+      await this.$services.sequenceLabeling.clear(this.projectId, this.doc.id);
+      await this.list(this.doc.id);
     },
 
     async autoLabel(docId) {
       try {
-        await this.$services.sequenceLabeling.autoLabel(this.projectId, docId)
+        await this.$services.sequenceLabeling.autoLabel(this.projectId, docId);
       } catch (e) {
-        console.log(e.response.data.detail)
+        console.log(e.response.data.detail);
       }
     },
 
     async updateProgress() {
-      this.progress = await this.$services.metrics.fetchMyProgress(this.projectId)
+      this.progress = await this.$services.metrics.fetchMyProgress(
+        this.projectId
+      );
     },
 
     async confirm() {
-      await this.$services.example.confirm(this.projectId, this.doc.id)
-      await this.$fetch()
-      this.updateProgress()
+      await this.$services.example.confirm(this.projectId, this.doc.id);
+      await this.$fetch();
+      this.updateProgress();
+    },
+
+    async approval() {
+      await this.$services.example.approval(this.projectId, this.doc.id);
+      await this.$fetch();
+      this.updateProgress();
     },
 
     changeSelectedLabel(event) {
-      this.selectedLabelIndex = this.spanTypes.findIndex((item) => item.suffixKey === event.srcKey)
-    }
-  }
-}
+      this.selectedLabelIndex = this.spanTypes.findIndex(
+        (item) => item.suffixKey === event.srcKey
+      );
+    },
+  },
+};
 </script>
 
 <style scoped>

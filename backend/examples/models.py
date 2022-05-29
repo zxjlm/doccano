@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.db import models
 
 from .managers import ExampleManager, ExampleStateManager
-from projects.models import Project
+from projects.models import Project, Member
 
 
 class Example(models.Model):
@@ -14,8 +14,10 @@ class Example(models.Model):
     meta = models.JSONField(default=dict)
     filename = models.FileField(default=".", max_length=1024)
     project = models.ForeignKey(to=Project, on_delete=models.CASCADE, related_name="examples")
-    assigned_to = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True, blank=True,
-                                    related_name="assigned_examples")
+    assigned_to_annotator = models.ForeignKey(to=Member, on_delete=models.SET_NULL, null=True, blank=True,
+                                              related_name="assigned_annotation_examples")
+    assigned_to_approval = models.ForeignKey(to=Member, on_delete=models.SET_NULL, null=True, blank=True,
+                                             related_name="assigned_approval_examples")
     annotations_approved_by = models.ForeignKey(to=User, on_delete=models.SET_NULL, null=True, blank=True)
     text = models.TextField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -41,6 +43,8 @@ class ExampleState(models.Model):
     example = models.ForeignKey(to=Example, on_delete=models.CASCADE, related_name="states")
     confirmed_by = models.ForeignKey(to=User, on_delete=models.CASCADE)
     confirmed_at = models.DateTimeField(auto_now=True)
+    approved_by = models.ForeignKey(to=User, on_delete=models.CASCADE, related_name="approved_user", null=True)
+    approved_at = models.DateTimeField(auto_now=True)
 
     class Meta:
         unique_together = (("example", "confirmed_by"),)

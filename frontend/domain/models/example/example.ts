@@ -5,7 +5,8 @@ export class ExampleItem {
   id: number;
   text: string;
   meta: object;
-
+  role: string;
+  
   @Expose({ name: 'annotation_approver' })
   annotationApprover: boolean | null;
 
@@ -17,6 +18,9 @@ export class ExampleItem {
 
   @Expose({ name: 'is_confirmed' })
   isConfirmed: boolean;
+
+  @Expose({ name: 'is_approved' })
+  isApproved: boolean;
 
   get url() {
     const l = this.fileUrl.indexOf('media/')

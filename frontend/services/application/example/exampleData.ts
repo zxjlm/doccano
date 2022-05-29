@@ -7,11 +7,13 @@ export class ExampleDTO {
   meta: object;
   annotationApprover: boolean | null;
   commentCount: number;
-  isApproved: boolean;
+  // isApproved: boolean;
   fileUrl: string;
   filename: string;
   url: string;
   isConfirmed: boolean;
+  isApproved: boolean;
+  role: string;
 
   constructor(item: ExampleItem) {
     this.id = item.id
@@ -19,11 +21,13 @@ export class ExampleDTO {
     this.meta = item.meta
     this.annotationApprover = item.annotationApprover
     this.commentCount = item.commentCount
-    this.isApproved = !!item.annotationApprover
+    // this.isApproved = !!item.annotationApprover
     this.fileUrl = item.fileUrl
     this.filename = item.filename
     this.url = item.url
     this.isConfirmed = item.isConfirmed
+    this.isApproved = item.isApproved
+    this.role = item.role
   }
 }
 

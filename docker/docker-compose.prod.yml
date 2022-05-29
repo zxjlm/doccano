@@ -4,14 +4,15 @@ services:
   backend:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.prod
-    image: doccano_backend:prod
+      dockerfile: docker/Dockerfile.dev
+    image: doccano_backend:dev
     ports:
       - "8000:8000"
     restart: always
     volumes:
       - static_volume:/backend/staticfiles
       - media:/backend/media
+    entrypoint: ["/bin/bash", "-c", "python -u manage.py runserver 0.0.0.0:8000" ]
     environment:
       ADMIN_USERNAME: "${ADMIN_USERNAME}"
       ADMIN_PASSWORD: "${ADMIN_PASSWORD}"
@@ -20,7 +21,7 @@ services:
       DATABASE_URL: "postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable"
       ALLOW_SIGNUP: "False"
       DEBUG: "False"
-      DJANGO_SETTINGS_MODULE: "config.settings.production"
+      DJANGO_SETTINGS_MODULE: "config.settings.development"
       # CSRF_TRUSTED_ORIGINS:
       #   - "http://47.103.76.95:9000"
     depends_on:

@@ -9,6 +9,7 @@ from projects.exceptions import RoleAlreadyAssignedException, RoleConstraintExce
 from projects.models import Member
 from projects.permissions import IsProjectAdmin, IsProjectMember
 from projects.serializers import MemberSerializer
+from projects.utils import re_assign_annotator, re_assign_approver
 
 
 class MemberList(generics.ListCreateAPIView):
@@ -29,10 +30,26 @@ class MemberList(generics.ListCreateAPIView):
         except IntegrityError:
             raise RoleAlreadyAssignedException
 
+        if self.request.data.get("rolename") == "annotator":
+            re_assign_annotator(self.kwargs["project_id"], True)
+        elif self.request.data.get("rolename") == "annotation_approver":
+            re_assign_approver(self.kwargs["project_id"], True)
+
+    def post(self, request, *args, **kwargs):
+        return self.create(request, *args, **kwargs)
+
     def delete(self, request, *args, **kwargs):
         delete_ids = request.data["ids"]
         project_id = self.kwargs["project_id"]
-        Member.objects.filter(project=project_id, pk__in=delete_ids).exclude(user=self.request.user).delete()
+
+        members = Member.objects.filter(project=project_id, pk__in=delete_ids).exclude(user=self.request.user)
+        roles = members.values_list("role__name", flat=True)
+        members.delete()
+        if "annotation_approver" in roles:
+            re_assign_approver(self.kwargs["project_id"])
+        if "annotator" in roles:
+            re_assign_annotator(self.kwargs["project_id"])
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 

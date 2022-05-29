@@ -29,6 +29,11 @@ class ExampleList(generics.ListCreateAPIView):
 
     def get_queryset(self):
         queryset = self.model.objects.filter(project=self.project)
+        member = self.request.user.role_mappings.filter(project_id=self.project.id).first()
+        if member.role.name == "annotator":
+            queryset = queryset.filter(assigned_to_annotator=member, states__confirmed_at=None)
+        elif member.role.name == "annotation_approver":
+            queryset = queryset.filter(assigned_to_approval=member).exclude(states__confirmed_at=None)
         if self.project.random_order:
             # Todo: fix the algorithm.
             random.seed(self.request.user.id)

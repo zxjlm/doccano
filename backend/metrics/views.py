@@ -16,7 +16,15 @@ class ProgressAPI(APIView):
     permission_classes = [IsAuthenticated & (IsProjectAdmin | IsProjectStaffAndReadOnly)]
 
     def get(self, request, *args, **kwargs):
-        examples = Example.objects.filter(project=self.kwargs["project_id"]).values("id")
+        member = Member.objects.filter(user=self.request.user, project_id=self.kwargs["project_id"]).first()
+        if member.role.name == "annotator":
+            examples = Example.objects.filter(project=self.kwargs["project_id"], assigned_to_annotator=member).values(
+                "id")
+        elif member.role.name == 'annotation_approver':
+            examples = Example.objects.filter(project=self.kwargs["project_id"], assigned_to_approval=member).values(
+                "id")
+        else:
+            examples = Example.objects.filter(project=self.kwargs["project_id"]).values("id")
         total = examples.count()
         complete = ExampleState.objects.count_done(examples, user=self.request.user)
         data = {"total": total, "remaining": total - complete, "complete": complete}

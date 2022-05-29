@@ -16,29 +16,29 @@
         </v-icon>
       </v-btn>
     </template>
-    <span v-if="isReviewd">{{ $t('annotation.checkedTooltip') }}</span>
-    <span v-else>{{ $t('annotation.notCheckedTooltip') }}</span>
+    <span v-if="isReviewd">{{ $t("annotation.checkedTooltip") }}</span>
+    <span v-else>{{ $t("annotation.notCheckedTooltip") }}</span>
   </v-tooltip>
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import { mdiClose, mdiCheck } from '@mdi/js'
+import Vue from "vue";
+import { mdiClose, mdiCheck } from "@mdi/js";
 
 export default Vue.extend({
   props: {
     isReviewd: {
       type: Boolean,
       default: false,
-      required: true
-    }
+      required: true,
+    },
   },
 
   data() {
     return {
       mdiClose,
-      mdiCheck
-    }
-  }
-})
+      mdiCheck,
+    };
+  },
+});
 </script>

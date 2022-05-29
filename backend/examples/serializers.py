@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from projects.models import Member
 from .models import Comment, Example, ExampleState
 
 
@@ -20,6 +21,8 @@ class CommentSerializer(serializers.ModelSerializer):
 class ExampleSerializer(serializers.ModelSerializer):
     annotation_approver = serializers.SerializerMethodField()
     is_confirmed = serializers.SerializerMethodField()
+    is_approved = serializers.SerializerMethodField()
+    role = serializers.SerializerMethodField()
 
     @classmethod
     def get_annotation_approver(cls, instance):
@@ -27,21 +30,32 @@ class ExampleSerializer(serializers.ModelSerializer):
         return approver.username if approver else None
 
     def get_is_confirmed(self, instance):
+        # user = self.context.get("request").user
+        # if instance.project.collaborative_annotation:
+        #     states = instance.states.all()
+        # member = Member.objects.filter(project_id=self.context.get("view").kwargs["project_id"], user=user).first()
+        states = instance.states.exclude(confirmed_by=None)
+        return states.exists() > 0
+
+    def get_is_approved(self, instance):
+        # user = self.context.get("request").user
+        states = instance.states.exclude(approved_by=None)
+        return states.exists() > 0
+
+    def get_role(self, instance):
         user = self.context.get("request").user
-        if instance.project.collaborative_annotation:
-            states = instance.states.all()
-        else:
-            states = instance.states.filter(confirmed_by_id=user.id)
-        return states.count() > 0
+        member = Member.objects.filter(project=instance.project, user=user).first()
+        return member.role.name
 
     class Meta:
         model = Example
-        fields = ["id", "filename", "meta", "annotation_approver", "comment_count", "text", "is_confirmed"]
-        read_only_fields = ["filename", "is_confirmed"]
+        fields = ["id", "filename", "meta", "annotation_approver", "comment_count", "text", "is_confirmed",
+                  "is_approved", "role"]
+        read_only_fields = ["filename", "is_confirmed", "is_approved", "role"]
 
 
 class ExampleStateSerializer(serializers.ModelSerializer):
     class Meta:
         model = ExampleState
-        fields = ("id", "example", "confirmed_by")
-        read_only_fields = ("id", "example", "confirmed_by")
+        fields = ("id", "example", "confirmed_by", "approved_by")
+        read_only_fields = ("id", "example", "confirmed_by", "approved_by")

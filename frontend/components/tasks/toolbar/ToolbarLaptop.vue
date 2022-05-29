@@ -1,9 +1,5 @@
 <template>
-  <v-toolbar
-    class="toolbar-control"
-    dense
-    flat
-  >
+  <v-toolbar class="toolbar-control" dense flat>
     <v-row no-gutters>
       <v-btn-toggle>
         <button-review
@@ -11,50 +7,48 @@
           @click:review="$emit('click:review')"
         />
 
-        <button-filter
-          :value="filterOption"
-          @click:filter="changeFilter"
+        <button-approval
+          v-if="role == 'project_admin' || role == 'annotation_approver'"
+          :is-approved="isApproved"
+          @click:approval="$emit('click:approval')"
         />
 
-        <button-guideline
-          @click:guideline="dialogGuideline=true"
-        />
+        <button-filter :value="filterOption" @click:filter="changeFilter" />
+
+        <button-guideline @click:guideline="dialogGuideline = true" />
         <v-dialog v-model="dialogGuideline">
           <form-guideline
             :guideline-text="guidelineText"
-            @click:close="dialogGuideline=false"
+            @click:close="dialogGuideline = false"
           />
         </v-dialog>
 
-        <button-comment
-          @click:comment="dialogComment=true"
-        />
+        <button-comment @click:comment="dialogComment = true" />
         <v-dialog v-model="dialogComment">
           <form-comment
             :example-id="docId"
-            @click:cancel="dialogComment=false"
+            @click:cancel="dialogComment = false"
           />
         </v-dialog>
 
-        <button-auto-labeling
-          @click:auto="dialogAutoLabeling=true"
-        />
+        <button-auto-labeling @click:auto="dialogAutoLabeling = true" />
         <v-dialog v-model="dialogAutoLabeling">
           <form-auto-labeling
             :is-enabled="enableAutoLabeling"
             :error-message="errorMessage"
-            @click:cancel="dialogAutoLabeling=false"
+            @click:cancel="dialogAutoLabeling = false"
             @input="updateAutoLabeling"
           />
         </v-dialog>
 
-        <button-clear
-          @click:clear="dialogClear=true"
-        />
+        <button-clear @click:clear="dialogClear = true" />
         <v-dialog v-model="dialogClear">
           <form-clear-label
-            @click:ok="$emit('click:clear-label');dialogClear=false"
-            @click:cancel="dialogClear=false"
+            @click:ok="
+              $emit('click:clear-label');
+              dialogClear = false;
+            "
+            @click:cancel="dialogClear = false"
           />
         </v-dialog>
       </v-btn-toggle>
@@ -74,18 +68,19 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
-import ButtonAutoLabeling from './buttons/ButtonAutoLabeling.vue'
-import ButtonClear from './buttons/ButtonClear.vue'
-import ButtonComment from './buttons/ButtonComment.vue'
-import ButtonFilter from './buttons/ButtonFilter.vue'
-import ButtonGuideline from './buttons/ButtonGuideline.vue'
-import ButtonPagination from './buttons/ButtonPagination.vue'
-import ButtonReview from './buttons/ButtonReview.vue'
-import FormAutoLabeling from './forms/FormAutoLabeling.vue'
-import FormClearLabel from './forms/FormClearLabel.vue'
-import FormComment from './forms/FormComment.vue'
-import FormGuideline from './forms/FormGuideline.vue'
+import Vue from "vue";
+import ButtonAutoLabeling from "./buttons/ButtonAutoLabeling.vue";
+import ButtonClear from "./buttons/ButtonClear.vue";
+import ButtonComment from "./buttons/ButtonComment.vue";
+import ButtonFilter from "./buttons/ButtonFilter.vue";
+import ButtonGuideline from "./buttons/ButtonGuideline.vue";
+import ButtonPagination from "./buttons/ButtonPagination.vue";
+import ButtonReview from "./buttons/ButtonReview.vue";
+import ButtonApproval from "./buttons/ButtonApproval.vue";
+import FormAutoLabeling from "./forms/FormAutoLabeling.vue";
+import FormClearLabel from "./forms/FormClearLabel.vue";
+import FormComment from "./forms/FormComment.vue";
+import FormGuideline from "./forms/FormGuideline.vue";
 
 export default Vue.extend({
   components: {
@@ -96,35 +91,44 @@ export default Vue.extend({
     ButtonGuideline,
     ButtonPagination,
     ButtonReview,
+    ButtonApproval,
     FormAutoLabeling,
     FormClearLabel,
     FormComment,
-    FormGuideline
+    FormGuideline,
   },
 
   props: {
     docId: {
       type: Number,
-      required: true
+      required: true,
     },
     enableAutoLabeling: {
       type: Boolean,
       default: false,
-      required: true
+      required: true,
     },
     guidelineText: {
       type: String,
-      default: '',
-      required: true
+      default: "",
+      required: true,
     },
     isReviewd: {
       type: Boolean,
-      default: false
+      default: false,
+    },
+    isApproved: {
+      type: Boolean,
+      default: false,
+    },
+    role: {
+      type: String,
+      default: "annotator",
     },
     total: {
       type: Number,
-      default: 1
-    }
+      default: 1,
+    },
   },
 
   data() {
@@ -133,47 +137,51 @@ export default Vue.extend({
       dialogClear: false,
       dialogComment: false,
       dialogGuideline: false,
-      errorMessage: ''
-    }
+      errorMessage: "",
+    };
   },
 
   computed: {
     page(): number {
       // @ts-ignore
-      return parseInt(this.$route.query.page, 10)
+      return parseInt(this.$route.query.page, 10);
     },
     filterOption(): string {
       // @ts-ignore
-      return this.$route.query.isChecked
-    }
+      return this.$route.query.isChecked;
+    },
   },
 
   methods: {
     updatePage(page: number) {
-      this.$router.push({ query: {
-        page: page.toString(),
-        isChecked: this.filterOption,
-        q: this.$route.query.q
-      }})
+      this.$router.push({
+        query: {
+          page: page.toString(),
+          isChecked: this.filterOption,
+          q: this.$route.query.q,
+        },
+      });
     },
 
     changeFilter(isChecked: string) {
-      this.$router.push({ query: {
-        page: '1',
-        isChecked,
-        q: this.$route.query.q
-      }})
+      this.$router.push({
+        query: {
+          page: "1",
+          isChecked,
+          q: this.$route.query.q,
+        },
+      });
     },
-    
+
     updateAutoLabeling(isEnable: boolean) {
       if (isEnable) {
-        this.$emit('update:enable-auto-labeling', true)
+        this.$emit("update:enable-auto-labeling", true);
       } else {
-        this.$emit('update:enable-auto-labeling', false)
+        this.$emit("update:enable-auto-labeling", false);
       }
-    }
-  }
-})
+    },
+  },
+});
 </script>
 
 <style scoped>

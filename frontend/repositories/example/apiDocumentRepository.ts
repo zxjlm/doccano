@@ -48,6 +48,12 @@ export class APIExampleRepository implements ExampleRepository {
 
   async confirm(projectId: string, exampleId: number): Promise<void> {
     const url = `/projects/${projectId}/examples/${exampleId}/states`
-    await this.request.post(url, {})
+    await this.request.post(url, {type: 0})
+  }
+
+  // todo: approval
+  async approval(projectId: string, exampleId: number): Promise<void> {
+    const url = `/projects/${projectId}/examples/${exampleId}/states`
+    await this.request.post(url, {type: 1})
   }
 }
