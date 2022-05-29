@@ -7,7 +7,7 @@ services:
       dockerfile: docker/Dockerfile.prod
     image: doccano_backend:prod
     ports:
-      - "8000:8000"
+      - "9003:8000"
     restart: always
     volumes:
       - static_volume:/backend/staticfiles
@@ -73,7 +73,7 @@ services:
       - static_volume:/static
       - media:/media
     ports:
-      - 9000:8080
+      - "9004:8080"
     depends_on:
       - backend
     networks:
