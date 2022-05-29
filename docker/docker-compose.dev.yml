@@ -4,8 +4,8 @@ services:
   backend:
     build:
       context: ..
-      dockerfile: docker/Dockerfile.prod
-    image: doccano_backend:prod
+      dockerfile: docker/Dockerfile.dev
+    image: doccano_backend:dev
     ports:
       - "8000:8000"
     restart: always
