@@ -25,11 +25,12 @@ RUN apt-get update \
  && apt-get clean
 
 WORKDIR /tmp
-COPY backend/pyproject.toml backend/poetry.lock /tmp/
+COPY backend/pyproject.toml backend/poetry.lock backend/poetry-1.1.13-linux.tar.gz backend/get-poetry.py /tmp/
 
 # hadolint ignore=DL3013
 RUN pip install --upgrade pip \
- && curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python - \
+ && python get-poetry.py --file poetry-1.1.13-linux.tar.gz \
+ && rm -r poetry-1.1.13-linux.tar.gz \
  && PATH="${PATH}:$HOME/.poetry/bin" \
  && poetry export --without-hashes -o /requirements.txt \
  && echo "psycopg2-binary==2.8.6" >> /requirements.txt \
