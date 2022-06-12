@@ -53,3 +53,8 @@ export class ExampleItemList {
   @Expose({ name: 'results' })
   items: ExampleItem[];
 }
+
+export interface ExampleAssignment {
+  annotator: string
+  approver: string
+}

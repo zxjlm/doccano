@@ -9,10 +9,10 @@
         @click="$emit('click:approval')"
       >
         <v-icon v-if="isApproved">
-          {{ mdiCheck }}
+          {{ mdiArchiveLock }}
         </v-icon>
         <v-icon v-else>
-          {{ mdiClose }}
+          {{ mdiArchiveLockOpen }}
         </v-icon>
       </v-btn>
     </template>
@@ -23,7 +23,7 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { mdiClose, mdiCheck } from "@mdi/js";
+import { mdiArchiveLock, mdiArchiveLockOpen } from "@mdi/js";
 
 export default Vue.extend({
   props: {
@@ -36,8 +36,8 @@ export default Vue.extend({
 
   data() {
     return {
-      mdiClose,
-      mdiCheck,
+      mdiArchiveLockOpen,
+      mdiArchiveLock,
     };
   },
 });

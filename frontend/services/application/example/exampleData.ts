@@ -1,4 +1,4 @@
-import { ExampleItem, ExampleItemList } from '~/domain/models/example/example'
+import { ExampleItem, ExampleItemList, ExampleAssignment } from '~/domain/models/example/example'
 
 
 export class ExampleDTO {
@@ -42,5 +42,14 @@ export class ExampleListDTO {
     this.next = item.next
     this.prev = item.prev
     this.items = item.items.map(_ => new ExampleDTO(_))
+  }
+}
+export class ExampleAssignmentDTO {
+  annotator: string
+  approver: string
+
+  constructor(item: ExampleAssignment) {
+    this.annotator = item.annotator
+    this.approver = item.approver
   }
 }

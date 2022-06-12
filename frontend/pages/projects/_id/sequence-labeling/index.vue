@@ -47,6 +47,7 @@
     </template>
     <template #sidebar>
       <annotation-progress :progress="progress" />
+      <assign-info :assignment="assignment" />
       <v-card class="mt-4">
         <v-card-title>Label Types</v-card-title>
         <v-card-text>
@@ -93,6 +94,7 @@ import ToolbarLaptop from "@/components/tasks/toolbar/ToolbarLaptop";
 import ToolbarMobile from "@/components/tasks/toolbar/ToolbarMobile";
 import EntityEditor from "@/components/tasks/sequenceLabeling/EntityEditor.vue";
 import AnnotationProgress from "@/components/tasks/sidebar/AnnotationProgress.vue";
+import AssignInfo from "@/components/tasks/sidebar/AssignInfo.vue";
 
 export default {
   components: {
@@ -102,6 +104,7 @@ export default {
     ListMetadata,
     ToolbarLaptop,
     ToolbarMobile,
+    AssignInfo,
   },
 
   layout: "workspace",
@@ -122,6 +125,7 @@ export default {
       rtl: false,
       selectedLabelIndex: null,
       progress: {},
+      assignment: {},
       relationMode: false,
     };
   },
@@ -222,11 +226,17 @@ export default {
         this.projectId,
         docId
       );
+      const assignment = await this.$services.example.getAssignment(
+        this.projectId,
+        docId
+      );
       // In colab mode, if someone add a new label and annotate data with the label during your work,
       // it occurs exception because there is no corresponding label.
       await this.maybeFetchSpanTypes(annotations);
       this.annotations = annotations;
       this.relations = relations;
+      // debugger;
+      this.assignment = assignment;
     },
 
     async deleteSpan(id) {

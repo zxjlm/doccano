@@ -207,3 +207,4 @@ webpack-stats.json
 /frontend/run.bat
 /run-docker-dev.bat
 poetry-1.1.13-*
+*.code-workspace

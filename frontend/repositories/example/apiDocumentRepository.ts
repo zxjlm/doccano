@@ -8,12 +8,14 @@ export class APIExampleRepository implements ExampleRepository {
     private readonly request = ApiService
   ) {}
 
-  async list(projectId: string, { limit = '10', offset = '0', q = '', isChecked = '' }: SearchOption): Promise<ExampleItemList> {
-    if (q === 'true' || q === 'false') {
-      isChecked = q
-      q = ''
-    } 
-    const url = `/projects/${projectId}/examples?limit=${limit}&offset=${offset}&q=${q}&confirmed=${isChecked}`
+  async list(projectId: string, { limit = '10', offset = '0', q = '', isChecked = '', isConfirmed = "",  isApproved=""}: SearchOption): Promise<ExampleItemList> {
+    let url = `/projects/${projectId}/examples?limit=${limit}&offset=${offset}&q=${q}&confirmed=${isChecked}`
+    if (isConfirmed) {
+      url += `&is_confirmed=${isConfirmed}`
+    }
+    if (isApproved) {
+      url += `&is_approved=${isApproved}`
+    }
     const response = await this.request.get(url)
     return plainToInstance(ExampleItemList, response.data)
   }
@@ -55,5 +57,11 @@ export class APIExampleRepository implements ExampleRepository {
   async approval(projectId: string, exampleId: number): Promise<void> {
     const url = `/projects/${projectId}/examples/${exampleId}/states`
     await this.request.post(url, {type: 1})
+  }
+
+  async getAssignment(projectId: number, exampleId: number): Promise<any> {
+    const url = `/projects/${projectId}/examples/${exampleId}/assignment`
+    const response = await this.request.get(url)
+    return response.data
   }
 }

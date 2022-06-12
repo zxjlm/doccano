@@ -20,6 +20,31 @@
     @input="$emit('input', $event)"
   >
     <template #top>
+      <v-container>
+        <v-row>
+          <v-col cols="12" md="4">
+            <v-select
+              v-model="confirmSelected"
+              :items="confirmSelectedItems"
+              label="是否已确认"
+              item-text="hint"
+              item-value="value"
+            >
+            </v-select>
+          </v-col>
+
+          <v-col cols="12" md="4">
+            <v-select
+              v-model="approveSelected"
+              :items="approveSelectedItems"
+              label="是否已审核"
+              item-text="hint"
+              item-value="value"
+            >
+            </v-select>
+          </v-col>
+        </v-row>
+      </v-container>
       <v-text-field
         v-model="search"
         :prepend-inner-icon="mdiMagnify"
@@ -33,14 +58,19 @@
       <span class="d-flex d-sm-none">{{ item.text | truncate(50) }}</span>
       <span class="d-none d-sm-flex">{{ item.text | truncate(200) }}</span>
     </template>
+    //
     <template #[`item.meta`]="{ item }">
-      {{ JSON.stringify(item.meta, null, 4) }}
+      // {{ JSON.stringify(item.meta, null, 4) }} //
     </template>
     <template #[`item.isConfirmed`]="{ item }">
       <span> {{ 1 ? item.isConfirmed : 0 }} </span>
     </template>
+    <template #[`item.isApproved`]="{ item }">
+      <span> {{ 1 ? item.isApproved : 0 }} </span>
+    </template>
+    //
     <template #[`item.commentCount`]="{ item }">
-      <span> {{ item.commentCount }} </span>
+      // <span> {{ item.commentCount }} </span> //
     </template>
     <template #[`item.action`]="{ item }">
       <v-btn small color="primary text-capitalize" @click="toLabeling(item)">
@@ -83,6 +113,36 @@ export default Vue.extend({
   data() {
     return {
       search: this.$route.query.q,
+      confirmSelectedItems: [
+        {
+          hint: "已确认",
+          value: 1,
+        },
+        {
+          hint: "未确认",
+          value: -1,
+        },
+        {
+          hint: "不选择",
+          value: 0,
+        },
+      ],
+      confirmSelected: "",
+      approveSelectedItems: [
+        {
+          hint: "已审核",
+          value: 1,
+        },
+        {
+          hint: "未审核",
+          value: -1,
+        },
+        {
+          hint: "不选择",
+          value: 0,
+        },
+      ],
+      approveSelected: "",
       options: {} as DataOptions,
       mdiMagnify,
     };
@@ -96,22 +156,28 @@ export default Vue.extend({
           value: "text",
           sortable: false,
         },
+        // {
+        //   text: this.$t("dataset.metadata"),
+        //   value: "meta",
+        //   sortable: false,
+        // },
         {
-          text: this.$t("dataset.metadata"),
-          value: "meta",
-          sortable: false,
-        },
-        {
-          text: this.$t("dataset.is_comfirmed"),
+          text: this.$t("annotation.isConfirmed"),
           value: "isConfirmed",
           sortable: false,
           filterable: true,
         },
         {
-          text: this.$t("comments.comments"),
-          value: "commentCount",
+          text: this.$t("annotation.isApproved"),
+          value: "isApproved",
           sortable: false,
+          filterable: true,
         },
+        // {
+        //   text: this.$t("comments.comments"),
+        //   value: "commentCount",
+        //   sortable: false,
+        // },
         {
           text: this.$t("dataset.action"),
           value: "action",
@@ -132,6 +198,8 @@ export default Vue.extend({
               this.options.itemsPerPage
             ).toString(),
             q: this.search,
+            isConfirmed: this.confirmSelected,
+            isApproved: this.approveSelected,
           },
         });
       },
@@ -143,6 +211,8 @@ export default Vue.extend({
           limit: this.options.itemsPerPage.toString(),
           offset: "0",
           q: this.search,
+          isConfirmed: this.confirmSelected,
+          isApproved: this.approveSelected,
         },
       });
       this.options.page = 1;
@@ -154,7 +224,12 @@ export default Vue.extend({
       const index = this.items.indexOf(item);
       const offset = (this.options.page - 1) * this.options.itemsPerPage;
       const page = (offset + index + 1).toString();
-      this.$emit("click:labeling", { page, q: this.search });
+      this.$emit("click:labeling", {
+        page,
+        q: this.search,
+        isConfirmed: this.confirmSelected,
+        isApproved: this.approveSelected,
+      });
     },
   },
 });

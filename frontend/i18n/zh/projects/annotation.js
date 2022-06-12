@@ -7,6 +7,8 @@ export default {
   filterOption1: '全部',
   filterOption2: '已标注',
   filterOption3: '未标注',
+  isConfirmed: '已确认',
+  isApproved: '已审核',
   guidelineTooltip: '显示指南',
   guidelinePopupTitle: '标注指南',
   commentTooltip: '点击对文档进行评论',

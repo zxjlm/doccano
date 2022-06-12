@@ -1,5 +1,5 @@
 import { plainToInstance } from 'class-transformer'
-import { ExampleDTO, ExampleListDTO } from './exampleData'
+import { ExampleDTO, ExampleListDTO, ExampleAssignmentDTO } from './exampleData'
 import { ExampleRepository, SearchOption } from '~/domain/models/example/exampleRepository'
 import { ExampleItem } from '~/domain/models/example/example'
 
@@ -63,6 +63,10 @@ export class ExampleApplicationService {
 
   public async approval(projectId: string, exampleId: number): Promise<void> {
     await this.repository.approval(projectId, exampleId)
+  }
+
+  public async getAssignment(projectId: number, exampleId: number): Promise<any> {
+    return await this.repository.getAssignment(projectId, exampleId)
   }
 
   private toModel(item: ExampleDTO): ExampleItem {

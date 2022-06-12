@@ -1,6 +1,6 @@
 export default {
-  checkedTooltip: 'Checked',
-  notCheckedTooltip: 'Not Checked',
+  checkedTooltip: 'Commit',
+  notCheckedTooltip: 'Not Commit',
   approvedTooltip: 'Approved',
   notApprovedTooltip: 'Not Approved',
   selectFilterTooltip: 'Select a Filter',

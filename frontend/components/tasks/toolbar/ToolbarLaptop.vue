@@ -7,12 +7,6 @@
           @click:review="$emit('click:review')"
         />
 
-        <button-approval
-          v-if="role == 'project_admin' || role == 'annotation_approver'"
-          :is-approved="isApproved"
-          @click:approval="$emit('click:approval')"
-        />
-
         <button-filter :value="filterOption" @click:filter="changeFilter" />
 
         <button-guideline @click:guideline="dialogGuideline = true" />
@@ -51,6 +45,12 @@
             @click:cancel="dialogClear = false"
           />
         </v-dialog>
+
+        <button-approval
+          v-if="role == 'project_admin' || role == 'annotation_approver'"
+          :is-approved="isApproved"
+          @click:approval="$emit('click:approval')"
+        />
       </v-btn-toggle>
       <slot />
       <v-spacer />
